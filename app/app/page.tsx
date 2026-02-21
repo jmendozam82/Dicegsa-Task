@@ -3,6 +3,7 @@ import { getActiveUsers } from './actions/meeting-actions';
 import { signOut } from './actions/auth-actions';
 import CreateMeetingSheet from '../ui/components/organisms/CreateMeetingSheet';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default async function Home() {
   const [profile, activeUsers] = await Promise.all([
