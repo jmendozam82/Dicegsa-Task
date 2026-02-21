@@ -1,0 +1,28 @@
+{
+    "skills": [
+        {
+            "id": "nextjs_expert",
+            "description": "Expertise in Next.js 14+ App Router, Server Components, and Actions."
+        },
+        {
+            "id": "supabase_security",
+            "description": "Deep knowledge of Supabase RLS policies and PostgreSQL security."
+        },
+        {
+            "id": "tailwind_apple_style",
+            "description": "Advanced styling with Tailwind CSS to achieve Apple-style aesthetics."
+        },
+        {
+            "id": "clean_architecture_ddd",
+            "description": "Ability to implement Domain-Driven Design and Clean Architecture patterns."
+        },
+        {
+            "id": "internationalization_es",
+            "description": "Management of localization with focus on Spanish UI."
+        },
+        {
+            "id": "framer_motion_master",
+            "description": "Implementation of complex animations and micro-interactions."
+        }
+    ]
+}

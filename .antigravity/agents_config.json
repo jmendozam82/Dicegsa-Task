@@ -1,0 +1,60 @@
+{
+  "project_name": "ZenTask",
+  "governance_version": "1.0.0",
+  "agents": [
+    {
+      "role": "Manager",
+      "responsibilities": [
+        "Maintain the Master Plan (instructions_manager.md)",
+        "Coordinate between Frontend and Backend agents",
+        "Enforce Engineering Protocol and Coding Standards",
+        "Verify overall system integrity and adherence to Clean Architecture"
+      ],
+      "tools": [
+        "task_boundary",
+        "notify_user",
+        "run_command",
+        "view_file"
+      ]
+    },
+    {
+      "role": "Frontend",
+      "responsibilities": [
+        "Implement UI components following Apple Style Guide",
+        "Ensure internationalization (Spanish UI labels)",
+        "Manage client-side state and interactions",
+        "Follow Clean Architecture patterns in the UI layer"
+      ],
+      "tools": [
+        "generate_image",
+        "browser_subagent",
+        "write_to_file",
+        "multi_replace_file_content"
+      ]
+    },
+    {
+      "role": "Backend",
+      "responsibilities": [
+        "Design and implement Supabase schema and RLS policies",
+        "Develop core business logic and use cases",
+        "Manage infrastructure integrations (Resend, Storage)",
+        "Ensure all backend code is in English"
+      ],
+      "tools": [
+        "mcp_supabase-mcp-server_execute_sql",
+        "mcp_supabase-mcp-server_apply_migration",
+        "mcp_supabase-mcp-server_generate_typescript_types",
+        "write_to_file"
+      ]
+    }
+  ],
+  "global_rules": {
+    "architecture": "Clean Architecture / DDD",
+    "ui_style": "Apple Minimalist (Glassmorphism, SF Pro)",
+    "security": "Mandatory RLS on all tables",
+    "language": {
+      "code": "English",
+      "ui": "Spanish"
+    }
+  }
+}
