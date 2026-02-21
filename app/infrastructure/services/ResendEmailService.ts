@@ -1,32 +1,32 @@
 import { IEmailService } from '../../core/use-cases/CreateTaskUseCase';
 
 interface ResendEmailBody {
-    from: string;
-    to: string[];
-    subject: string;
-    html: string;
+  from: string;
+  to: string[];
+  subject: string;
+  html: string;
 }
 
 export class ResendEmailService implements IEmailService {
-    private readonly apiKey: string;
-    private readonly fromAddress: string;
+  private readonly apiKey: string;
+  private readonly fromAddress: string;
 
-    constructor() {
-        this.apiKey = process.env.RESEND_API_KEY ?? '';
-        this.fromAddress = process.env.RESEND_FROM_EMAIL ?? 'ZenTask <noreply@updates.zentask.app>';
-    }
+  constructor() {
+    this.apiKey = process.env.RESEND_API_KEY ?? '';
+    this.fromAddress = process.env.RESEND_FROM_EMAIL ?? 'ZenTask <noreply@updates.zentask.app>';
+  }
 
-    async sendTaskAssignmentEmail(params: {
-        to: string;
-        assigneeName: string;
-        adminName: string;
-        taskTitle: string;
-        meetingTitle: string;
-        appUrl: string;
-    }): Promise<void> {
-        const { to, assigneeName, adminName, taskTitle, meetingTitle, appUrl } = params;
+  async sendTaskAssignmentEmail(params: {
+    to: string;
+    assigneeName: string;
+    adminName: string;
+    taskTitle: string;
+    meetingTitle: string;
+    appUrl: string;
+  }): Promise<void> {
+    const { to, assigneeName, adminName, taskTitle, meetingTitle, appUrl } = params;
 
-        const html = `
+    const html = `
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -100,25 +100,36 @@ export class ResendEmailService implements IEmailService {
 </body>
 </html>`;
 
-        const body: ResendEmailBody = {
-            from: this.fromAddress,
-            to: [to],
-            subject: `Nueva tarea: ${taskTitle}`,
-            html,
-        };
+    // En modo Sandbox, solo podemos enviar correos al destinatario verificado en Resend.
+    const verifiedSandboxEmail = 'jorgemendozamartinez@gmail.com';
 
-        const response = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${this.apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Resend API error: ${errorText}`);
-        }
+    if (to.trim().toLowerCase() !== verifiedSandboxEmail.toLowerCase()) {
+      console.log(`[SIMULACIÓN] Correo no enviado por restricciones de Sandbox a: ${to}`);
+      return;
     }
+
+    const body: ResendEmailBody = {
+      from: 'ZenTask <onboarding@resend.dev>',
+      to: [to],
+      subject: `Nueva tarea: ${taskTitle}`,
+      html,
+    };
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(`Resend API error: ${JSON.stringify(data)}`);
+    }
+
+    return data;
+  }
 }

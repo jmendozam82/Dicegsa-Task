@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createClient } from '../../infrastructure/supabase/server';
+import { createClient, createAdminClient } from '../../infrastructure/supabase/server';
 import { SupabaseTaskRepository } from '../../infrastructure/repositories/SupabaseTaskRepository';
 import { SupabaseProfileRepository } from '../../infrastructure/repositories/SupabaseProfileRepository';
 import { ResendEmailService } from '../../infrastructure/services/ResendEmailService';
@@ -36,15 +36,18 @@ export async function createTask(input: CreateTaskInput): Promise<ActionResult<{
             supabase.from('meetings').select('title').eq('id', input.meeting_id).single(),
         ]);
 
-        // Get assignee email from auth
-        const { data: { user: assigneeUser } } = await supabase.auth.admin.getUserById(input.assigned_to).catch(() => ({ data: { user: null } }));
+        // Get assignee email from auth (using Admin Client to access auth schema)
+        const adminClient = await createAdminClient();
+        const { data: { user: assigneeUser } } = await adminClient.auth.admin.getUserById(input.assigned_to);
         const assigneeEmail = assigneeUser?.email ?? '';
+
+        console.log(`Debug - Assignee ID: ${input.assigned_to}, Email: ${assigneeEmail}`);
 
         const taskRepo = new SupabaseTaskRepository();
         const emailService = new ResendEmailService();
         const useCase = new CreateTaskUseCase(taskRepo, emailService);
 
-        const task = await useCase.execute(
+        const resendResult = await useCase.execute(
             input,
             user.id,
             adminProfile.full_name ?? 'Administrador',
@@ -53,8 +56,10 @@ export async function createTask(input: CreateTaskInput): Promise<ActionResult<{
             (meetingResult.data as { title: string } | null)?.title ?? 'Reunión',
         );
 
+        console.log('Resultado de Resend:', resendResult);
+
         revalidatePath('/seguimiento');
-        return { success: true, data: { id: task.id } };
+        return { success: true, data: { id: (resendResult as any)?.id || 'unknown' } };
     } catch (err) {
         return { success: false, error: err instanceof Error ? err.message : 'Error inesperado.' };
     }
