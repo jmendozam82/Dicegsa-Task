@@ -53,4 +53,25 @@ export class SupabaseProfileRepository implements IProfileRepository {
         const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
         return data.publicUrl;
     }
+
+    async getAllProfiles(): Promise<Profile[]> {
+        const supabase = await createClient();
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .order('full_name', { ascending: true });
+
+        if (error) throw new Error(error.message);
+        return (data ?? []) as Profile[];
+    }
+
+    async updateUserStatus(userId: string, active: boolean): Promise<void> {
+        const supabase = await createClient();
+        const { error } = await supabase
+            .from('profiles')
+            .update({ active, updated_at: new Date().toISOString() })
+            .eq('id', userId);
+
+        if (error) throw new Error(error.message);
+    }
 }

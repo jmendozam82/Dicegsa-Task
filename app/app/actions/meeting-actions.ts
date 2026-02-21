@@ -4,6 +4,7 @@ import { createClient } from '../../infrastructure/supabase/server';
 import { SupabaseMeetingRepository } from '../../infrastructure/repositories/SupabaseMeetingRepository';
 import { CreateMeetingUseCase } from '../../core/use-cases/CreateMeetingUseCase';
 import { CreateMeetingInput } from '../../core/entities/Meeting';
+import { revalidatePath } from 'next/cache';
 
 type ActionResult<T> = { success: true; data: T } | { success: false; error: string };
 
@@ -39,10 +40,45 @@ export async function createMeeting(
         const useCase = new CreateMeetingUseCase(repository);
         const meeting = await useCase.execute(input, user.id);
 
+        // revalidate paths as requested
+        revalidatePath('/');
+        revalidatePath('/admin/dashboard');
+
         return { success: true, data: { id: meeting.id, title: meeting.title } };
     } catch (err) {
         const message = err instanceof Error ? err.message : 'Error inesperado.';
         return { success: false, error: message };
+    }
+}
+
+export async function getMeetingDetail(id: string) {
+    try {
+        const repository = new SupabaseMeetingRepository();
+        return await repository.getMeetingById(id);
+    } catch (err) {
+        return null;
+    }
+}
+
+export async function getParticipants(meetingId: string) {
+    try {
+        const repository = new SupabaseMeetingRepository();
+        return await repository.getMeetingParticipants(meetingId);
+    } catch (err) {
+        return [];
+    }
+}
+
+export async function getMeetings() {
+    try {
+        const supabase = await createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return [];
+
+        const repository = new SupabaseMeetingRepository();
+        return await repository.getMeetingsForUser(user.id);
+    } catch (err) {
+        return [];
     }
 }
 

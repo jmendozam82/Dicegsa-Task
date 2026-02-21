@@ -98,12 +98,30 @@ export default async function SeguimientoPage() {
                             const done = meetingTasks.filter(t => t.deliverable_url).length;
                             return (
                                 <section key={meeting}>
-                                    <div className="flex items-center justify-between mb-3 px-1">
-                                        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                                            📋 {meeting}
-                                        </h2>
-                                        <span className="text-xs text-gray-400">{done}/{meetingTasks.length} entregados</span>
+                                    <div className="flex items-center justify-between mb-4 px-1">
+                                        <div className="flex flex-col">
+                                            <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                                                📋 {meeting}
+                                            </h2>
+                                            <p className="text-[11px] text-gray-400 mt-0.5">
+                                                {done} de {meetingTasks.length} tareas completadas
+                                            </p>
+                                        </div>
+                                        <div className="text-right">
+                                            <span className="text-sm font-bold text-[#007AFF]">
+                                                {Math.round((done / meetingTasks.length) * 100)}%
+                                            </span>
+                                        </div>
                                     </div>
+
+                                    {/* Per-meeting progress bar */}
+                                    <div className="w-full h-1 bg-gray-200/50 rounded-full overflow-hidden mb-4 mx-1">
+                                        <div
+                                            className="h-full bg-[#007AFF] rounded-full transition-all duration-500"
+                                            style={{ width: `${(done / meetingTasks.length) * 100}%` }}
+                                        />
+                                    </div>
+
                                     <div className="flex flex-col gap-3">
                                         {meetingTasks.map((task) => (
                                             <TaskCard key={task.id} task={task} isAdmin={true} />

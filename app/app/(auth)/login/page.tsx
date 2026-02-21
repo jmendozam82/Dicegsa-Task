@@ -1,18 +1,26 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { signIn, signUp } from '../../actions/auth-actions';
+import { useSearchParams } from 'next/navigation';
 
 type Tab = 'login' | 'register';
 
-export default function LoginPage() {
+function LoginForm() {
+    const searchParams = useSearchParams();
     const [tab, setTab] = useState<Tab>('login');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
+
+    useEffect(() => {
+        if (searchParams.get('error') === 'inactive') {
+            setError('Tu cuenta ha sido desactivada. Contacta al administrador.');
+        }
+    }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,8 +68,8 @@ export default function LoginPage() {
                             type="button"
                             onClick={() => { setTab(t); setError(null); }}
                             className={`flex-1 py-2 text-sm font-medium rounded-xl transition-all duration-200 ${tab === t
-                                    ? 'bg-white text-gray-900 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-gray-900 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             {t === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
@@ -158,5 +166,13 @@ export default function LoginPage() {
                 </form>
             </div>
         </div>
+    );
+}
+
+export default function LoginPage() {
+    return (
+        <Suspense fallback={null}>
+            <LoginForm />
+        </Suspense>
     );
 }

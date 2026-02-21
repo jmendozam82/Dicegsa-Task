@@ -30,6 +30,23 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
+    // Check if user is active
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('active')
+            .eq('id', user.id)
+            .single();
+
+        if (profile && profile.active === false) {
+            await supabase.auth.signOut();
+            const url = request.nextUrl.clone();
+            url.pathname = '/login';
+            url.searchParams.set('error', 'inactive');
+            return NextResponse.redirect(url);
+        }
+    }
+
     const { pathname } = request.nextUrl;
     const isPublicRoute = pathname.startsWith('/login');
 

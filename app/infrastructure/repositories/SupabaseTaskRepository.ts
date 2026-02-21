@@ -85,7 +85,11 @@ export class SupabaseTaskRepository implements ITaskRepository {
 
         const { data, error } = await supabase
             .from('tasks')
-            .update({ deliverable_url: url, status: 'done' })
+            .update({
+                deliverable_url: url,
+                status: 'done',
+                delivered_at: new Date().toISOString()
+            })
             .eq('id', taskId)
             .eq('assigned_to', userId)
             .select()

@@ -10,6 +10,7 @@ export interface Task {
     status: TaskStatus;
     deliverable_url: string | null;
     due_date: string | null;
+    delivered_at: string | null;
     created_at: string;
 }
 
